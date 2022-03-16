@@ -3,3 +3,7 @@ a.out
 
 # Don't include any vscode folders
 .vscode
+
+# Ignore test files
+test
+*.test
