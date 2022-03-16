@@ -1,2 +1,0 @@
-Supposedly this file can contain an infinitely long string. It'll take an infinite amount of time for the buffer to read it, but assuming it does hit a EOF it
-will eventually print
