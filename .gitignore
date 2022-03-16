@@ -7,3 +7,6 @@ a.out
 # Ignore test files
 test
 *.test
+
+# Ignore .swp files created by nano
+*.swp

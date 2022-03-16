@@ -4,12 +4,12 @@
 
 int main() {
     FILE *fp;
-    
     fp = fopen("test", "r");
 
-    int bufferSize = 2;
-    char *buffer = calloc(bufferSize, sizeof(char));
-    char *sbuffer = calloc(1, sizeof(char));
+    // Set up buffer
+    int bufferSize = 2; // Buffer size of 2 to hold a single char and null character
+    char *buffer = calloc(bufferSize, sizeof(char)); // Allocate the buffer's initial size
+    char *sbuffer = calloc(1, sizeof(char)); // Create another "buffer" to do string operations
 
     // This took way too long for me to get right, but it works well
     for(char c = fgetc(fp); c != EOF; c = fgetc(fp)) {
