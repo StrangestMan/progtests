@@ -74,6 +74,10 @@ int main() {
     // HEEEEEEEEEEEEEEEEEEEELLLLLLLLLLLLLLLL YYYYYYYYYYYYYEEEEEEEEEEEEEEAAAAAAAAAAAAAAHHHHHHHHH
     // I didn't believe this would ever work
 
+    free(buffer);
+    free(sbuffer);
+    fclose(fp);
+
     return 0;
 }
 
