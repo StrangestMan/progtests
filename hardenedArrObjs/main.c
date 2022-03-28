@@ -52,80 +52,67 @@ int main() {
         return 1;
     }
 
-    for(char c = fgetc(fp); c != EOF; c = fgetc(fp)) {
-        // I should replace this with an if-else statement so I can manage the EOF
-        switch(c) {
-            default:
-                // Copy the current character into the current buffer
-                *sbuffer = c;
-                strcat(buffer[buffIndex], sbuffer);
-                
-                // Reallocate the buffer to be 1 character larger
-                buffSize++;
-                buffer[buffIndex]  = reallocarray(buffer[buffIndex], buffSize, sizeof(char));
-                if(buffer[buffIndex] == NULL) {
-                    fprintf(stderr, "Could not resize buffer[%d]\n", buffIndex);
-                    return 1;
-                }
-            break;
-            case(';'):
-                // Increase the buffer index to use the next buffer, if doing so wouldn't cause a crash
-                if(buffIndex + 1 < 2) {
-                    buffIndex++;
-                    buffSize = DEF_BUFFSIZE;
-                } else {
-                    fprintf(stderr, "Too many semicolons in string. Skipping to next line...\n");
-
-                    // Skip to the next newline
-                    for(char a = fgetc(fp); a != '\n'; a = fgetc(fp));
-                    // Scoot back 1 character to set up next object
-                    if(fseek(fp, -1 * sizeof(char), SEEK_CUR) == -1) {
-                        fprintf(stderr, "fseek call broke");
-                        return 1;
-                    }
-                }
-            break;
-            case('\n'):
-                // Initalize the current confLine object
-                initConfLine(&config[confIndex]);
-                if(config == NULL) {
-                    fprintf(stderr, "Couldn't initalize confLine, array destroyed\n");
-                    return 1;
-                }
-
-                // Set the lengths of each string for later copying
-                config[confIndex].srcLength = strlen(buffer[0]) + 1;
-                config[confIndex].destLength = strlen(buffer[1]) + 1;
-
-                // Reallocate both arrays to fit the buffer
-                config[confIndex].src = reallocarray(config[confIndex].src, config[confIndex].srcLength, sizeof(char));
-                if(config[confIndex].src == NULL) {
-                    fprintf(stderr, "Could not reallocate config[%d].src\n", confIndex);
-                    return 1;
-                }
-                config[confIndex].dest = reallocarray(config[confIndex].dest, config[confIndex].destLength, sizeof(char));
-                if(config[confIndex].dest == NULL) {
-                    fprintf(stderr, "Could not reallocate config[%d].dest\n", confIndex);
-                    return 1;
-                }
-
-                // Copy the buffer into the object
-                strcpy(config[confIndex].src, buffer[0]);
-                strcpy(config[confIndex].dest, buffer[1]);
-
-                // Reset the buffer for the next iteration
-                buffIndex = 0;
+    int readFile = 0;
+    // I love the flexibility of for loops
+    for(char c = fgetc(fp); readFile == 0; c = fgetc(fp)) {
+        if(c == ';') {
+            // Increase the buffer index to use the next buffer, if doing so wouldn't cause a crash
+            if(buffIndex + 1 < 2) {
+                buffIndex++;
                 buffSize = DEF_BUFFSIZE;
-                for(int i = 0; i < 2; i++) {
-                    strcpy(buffer[i], "");
-                    buffer[i] = realloc(buffer[i], buffSize * sizeof(char));
-                    if(buffer[i] == NULL) {
-                        fprintf(stderr, "Could not reset buffer[%d] size\n", i);
-                        return 1;
-                    }
-                }
+            } else {
+                fprintf(stderr, "Too many semicolons in string. Skipping to next line...\n");
 
-                // Increase the size of the config array
+                // Skip to the next newline
+                for(char a = fgetc(fp); a != '\n'; a = fgetc(fp));
+                // Scoot back 1 character to set up next object
+                if(fseek(fp, -1 * sizeof(char), SEEK_CUR) == -1) {
+                    fprintf(stderr, "fseek call broke");
+                    return 1;
+                }
+            }
+        } else if(c == '\n' || c == EOF) {
+            // Initalize the current confLine object
+            initConfLine(&config[confIndex]);
+            if(config == NULL) {
+                fprintf(stderr, "Couldn't initalize confLine, array destroyed\n");
+                return 1;
+            }
+
+            // Set the lengths of each string for later copying
+            config[confIndex].srcLength = strlen(buffer[0]) + 1;
+            config[confIndex].destLength = strlen(buffer[1]) + 1;
+
+            // Reallocate both arrays to fit the buffer
+            config[confIndex].src = reallocarray(config[confIndex].src, config[confIndex].srcLength, sizeof(char));
+            if(config[confIndex].src == NULL) {
+                fprintf(stderr, "Could not reallocate config[%d].src\n", confIndex);
+                return 1;
+            }
+            config[confIndex].dest = reallocarray(config[confIndex].dest, config[confIndex].destLength, sizeof(char));
+            if(config[confIndex].dest == NULL) {
+                fprintf(stderr, "Could not reallocate config[%d].dest\n", confIndex);
+                return 1;
+            }
+
+            // Copy the buffer into the object
+            strcpy(config[confIndex].src, buffer[0]);
+            strcpy(config[confIndex].dest, buffer[1]);
+
+            // Reset the buffer for the next iteration
+            buffIndex = 0;
+            buffSize = DEF_BUFFSIZE;
+            for(int i = 0; i < 2; i++) {
+                strcpy(buffer[i], "");
+                buffer[i] = realloc(buffer[i], buffSize * sizeof(char));
+                if(buffer[i] == NULL) {
+                    fprintf(stderr, "Could not reset buffer[%d] size\n", i);
+                    return 1;
+                }
+            }
+
+            // Increase the size of the config array
+            if(c != EOF) {
                 confSize++;
                 confIndex++;
                 config = reallocarray(config, confSize, sizeof(confLine));
@@ -133,8 +120,23 @@ int main() {
                     fprintf(stderr, "Could not expand config array\n");
                     return 1;
                 }
+            }
+        } else {
+            // Copy the current character into the current buffer
+            *sbuffer = c;
+            strcat(buffer[buffIndex], sbuffer);
+            
+            // Reallocate the buffer to be 1 character larger
+            buffSize++;
+            buffer[buffIndex]  = reallocarray(buffer[buffIndex], buffSize, sizeof(char));
+            if(buffer[buffIndex] == NULL) {
+                fprintf(stderr, "Could not resize buffer[%d]\n", buffIndex);
+                return 1;
+            }
+        }
 
-            break;
+        if(c == EOF) {
+            readFile++;
         }
     }
 
