@@ -15,9 +15,14 @@ int main() {
     // Put some text in the string
     strcpy(buffer, "\nThis is some cool text\n");
 
+    // Char for testing
+    char c;
+
     // This is what I was interested in, the *buffer in the while loop
     while(*buffer) {
-        fputc(*((int *)buffer), stdout);
+        //fputc(*((int *)buffer), stdout);
+        c = *buffer;
+        printf("%c", c);
         buffer++;
     }
 
