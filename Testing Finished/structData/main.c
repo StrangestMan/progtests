@@ -37,44 +37,61 @@ int main() {
     off_t buffSize = 1;
     off_t buffIndex = 0;
     char **buff = NULL;
-
     buff = calloc(buffSize, sizeof(char*));
 
-    for(char *token = strtok(filebuf, "\n"); token != NULL; token = strtok(NULL, "\n")) {
+    // Split the file buffer into smaller lines (by newline)
+    for(char *token = strtok(filebuf, "\n"); token != NULL;) {
         buff[buffIndex] = calloc(strlen(token) + 1, sizeof(char));
         strcpy(buff[buffIndex], token);
 
-        buffSize++;
-        buffIndex++;
-
-        buff = reallocarray(buff, buffSize, sizeof(char*));
+        if((token = strtok(NULL, "\n")) != NULL) {
+            buffSize++;
+            buffIndex++;
+            buff = reallocarray(buff, buffSize, sizeof(char*));
+        }
     }
 
-    // Create a second buffer to split lines into strings
+    for(int i = 0; i < buffSize; i++) {
+        printf("%s\n", buff[i]);
+    }
+    printf("\n");
+    printf("Size of buff: %ld, Index: %ld\n\n", buffSize, buffIndex);
 
+    // Create a second buffer to split lines into strings
     off_t buff2Size = 1;
     off_t buff2Index = 0;
     char **buff2 = NULL;
     buff2 = calloc(buff2Size, sizeof(char*));
 
-    // I've gotta figure out why buffSize causes a segfault, but buffSize - 1 doesn't. My intuition says either the final index in buffSize doesn't exist, or is NULL
-    for(int i = 0; i < buffSize - 1; i++) {
-        for(char *token = strtok(buff[i], ";"); token != NULL; token = strtok(NULL, ";")) {
+    // Split each line into smaller strings (by semicolon)
+    for(int i = 0; i < buffSize; i++) {
+        for(char *token = strtok(buff[i], ";"); token != NULL;) {
             buff2[buff2Index] = calloc(strlen(token) + 1, sizeof(char));
             strcpy(buff2[buff2Index], token);
 
+            if((token = strtok(NULL, ";")) != NULL) {
             buff2Size++;
             buff2Index++;
-
+            buff2 = reallocarray(buff2, buff2Size, sizeof(char*));
+            }
+        }
+        if(i < buffSize - 1) {
+            buff2Size++;
+            buff2Index++;
             buff2 = reallocarray(buff2, buff2Size, sizeof(char*));
         }
     }
 
-    // Print the fully split buffer to check if it works
-    for(int i = 0; i < buff2Size - 1; i++) {
+    // The reason this broke for a while is because my code assumes that the current index is empty and needs to be allocated. If the buffer's index didn't increment
+    //  then it allocates more memory to the same address (causing a memory leak) and copys the new string into the space (losing the old string's info)
+
+    // Slapping on another if-statement just to allocate the buffer to be slightly larger isn't perfect, but it's better than reallocating strings needlessly
+    
+    for(int i = 0; i < buff2Size; i++) {
         printf("%s\n", buff2[i]);
     }
-
+    printf("\nSize of buff2: %ld, Index: %ld\n", buff2Size, buff2Index);
+    
     // IDK if this is actually doing anything. It doesn't crash though
     free(filebuf);
 
