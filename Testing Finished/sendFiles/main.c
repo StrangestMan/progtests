@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -14,13 +15,17 @@ int main() {
     stat(PATHFROM, &info);
 
     int fd1 = open(PATHFROM, O_RDONLY); // Open the file to copy in read-only mode
-    int fd2 = open(PATHTO, O_WRONLY | O_CREAT | O_TRUNC, info.st_mode & 0777); // Open the result in write-only mode, create / overwrite it, and copy file permissions
-
+    int fd2 = open(PATHTO, O_WRONLY | O_CREAT | O_TRUNC); // Open the result in write-only mode, and create / overwrite it
+    // Sidenote: I don't know exactly why setting the mode in open() doesn't work, but I do know that I am now majorly annoyed because of it
+    
     //printf("perms: %o\n", info.st_mode & 0777);
     // Didn't think I'd get working code from Wikipedia, but I've been proven wrong. Apparently it was as easy as and-ing the number for max permissions
 
     // Send all the contents of file 1 into file 2 from the beginning of the file
     sendfile(fd2, fd1, 0, info.st_size);
+
+    // Chmod the file to the correct permissions
+    chmod(PATHTO, (info.st_mode & 0777));
 
     // Close open file descriptors
     close(fd2);
