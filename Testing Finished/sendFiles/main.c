@@ -25,7 +25,7 @@ int main() {
     sendfile(fd2, fd1, 0, info.st_size);
 
     // Chmod the file to the correct permissions
-    chmod(PATHTO, (info.st_mode & 0777));
+    fchmod(fd2, (info.st_mode & 0777));
 
     // Close open file descriptors
     close(fd2);
