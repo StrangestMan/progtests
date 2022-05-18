@@ -70,9 +70,9 @@ int main() {
             strcpy(buff2[buff2Index], token);
 
             if((token = strtok(NULL, ";")) != NULL) {
-            buff2Size++;
-            buff2Index++;
-            buff2 = reallocarray(buff2, buff2Size, sizeof(char*));
+                buff2Size++;
+                buff2Index++;
+                buff2 = reallocarray(buff2, buff2Size, sizeof(char*));
             }
         }
         if(i < buffSize - 1) {
