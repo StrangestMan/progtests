@@ -1,5 +1,7 @@
 # Don't include compiled binaries
 a.out
+main
+*.o
 
 # Don't include any vscode folders
 .vscode
