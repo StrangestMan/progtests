@@ -42,8 +42,10 @@ char* betterok(const char *STRING, const char *DELIM, long int *offset) {
 }
 
 // I could use strlen here, but I wanted to do something different. If strlen is faster, I'll change this
+
+// Turns out strlen is faster. I should look at it's implementation sometime. Maybe compiling as -O3 would make it faster. 
+
+// Nope still slower. Strlen it is
 long int rstrlen(const char *STRING) {
-    long int size = 0;
-    for(; *STRING; STRING++, size++);
-    return size + 1;
+    return strlen(STRING) + 1;
 }
